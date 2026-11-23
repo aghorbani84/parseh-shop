@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://aghorbani84.github.io/parseh-shop/sitemap.xml

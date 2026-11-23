@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>محصول | پارسه</title>
+<meta name="description" content="جزئیات محصول پارسه. کاتالوگ نمونه است و قیمت‌ها واقعی نیستند.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">پرش به محتوا</a>
+<div class="demo-banner"><strong>کاتالوگ نمونه</strong>: قیمت‌ها واقعی نیستند؛ لیست واقعی به‌زودی.</div>
+<header class="site-header" id="site-header"></header>
+<main id="main" class="section container">
+  <p><a href="shop.html">← بازگشت به فروشگاه</a></p>
+  <div id="detail"><p class="muted">در حال بارگذاری محصول…</p></div>
+  <section class="section" id="related-wrap" style="display:none">
+    <div class="section-head"><h2>محصولات مرتبط</h2></div>
+    <div class="grid" id="related-grid"></div>
+  </section>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var sku = new URLSearchParams(location.search).get('sku');
+  var host = document.getElementById('detail');
+  if (!sku) { host.innerHTML = '<p class="empty">محصولی انتخاب نشده است. <a href="shop.html">بازگشت به فروشگاه</a></p>'; return; }
+  Parseh.loadJSON('products.json').then(function (data) {
+    var p = null;
+    data.products.forEach(function (x) { if (x.sku === sku) p = x; });
+    if (!p) { host.innerHTML = '<p class="empty">این محصول پیدا نشد. <a href="shop.html">بازگشت به فروشگاه</a></p>'; return; }
+    var cats = {};
+    data.categories.forEach(function (c) { cats[c.id] = c; });
+    document.title = p.name + ' | پارسه';
+    var specs = Object.keys(p.specs || {}).map(function (k) {
+      return '<tr><th>' + Parseh.escapeHtml(k) + '</th><td>' + Parseh.escapeHtml(p.specs[k]) + '</td></tr>';
+    }).join('');
+    host.innerHTML =
+      '<div class="detail">' +
+      '<div class="detail-img"><img src="' + Parseh.escapeHtml(p.image) + '" alt="' + Parseh.escapeHtml(p.name) + '">' +
+      '<span class="badge-demo">' + Parseh.escapeHtml(p.badge || 'نمونه') + '</span></div>' +
+      '<div><span class="card-cat">' + Parseh.escapeHtml((cats[p.category] || {}).name || '') + '</span>' +
+      '<h1 style="font-size:26px">' + Parseh.escapeHtml(p.name) + '</h1>' +
+      '<p class="muted">کد کالا: <span dir="ltr">' + Parseh.escapeHtml(p.sku) + '</span></p>' +
+      '<p>' + Parseh.escapeHtml(p.short || '') + '</p>' +
+      '<p class="price" style="font-size:24px">' + Parseh.escapeHtml(ParsehCart.formatToman(p.price_toman)) + '</p>' +
+      '<p class="small muted">قیمت نمونه است و واقعی نیست؛ قیمت دقیق را از دایرکت بگیر.</p>' +
+      '<p class="stock">' + (p.stock > 0 ? 'موجود: ' + Number(p.stock).toLocaleString('fa-IR') + ' عدد' : 'ناموجود') + '</p>' +
+      '<div class="qty-row"><button class="qty-btn" id="qty-minus" aria-label="کمتر">−</button>' +
+      '<span class="qty-val" id="qty-val">۱</span>' +
+      '<button class="qty-btn" id="qty-plus" aria-label="بیشتر">+</button></div>' +
+      '<button class="btn btn-block" id="add-btn"' + (p.stock > 0 ? '' : ' disabled') + '>افزودن به سبد</button>' +
+      '<p style="margin-top:13px"><a class="btn btn-ghost btn-block" href="https://ig.me/m/parseh">سؤال دربارهٔ این محصول در دایرکت</a></p>' +
+      '</div></div>' +
+      (specs ? '<h2>مشخصات</h2><table class="specs"><tbody>' + specs + '</tbody></table>' : '');
+    var qty = 1, qtyVal = document.getElementById('qty-val');
+    document.getElementById('qty-minus').addEventListener('click', function () {
+      qty = Math.max(1, qty - 1); qtyVal.textContent = Number(qty).toLocaleString('fa-IR');
+    });
+    document.getElementById('qty-plus').addEventListener('click', function () {
+      qty = Math.min(p.stock, qty + 1); qtyVal.textContent = Number(qty).toLocaleString('fa-IR');
+    });
+    document.getElementById('add-btn').addEventListener('click', function () {
+      ParsehCart.add(p.sku, qty, p.stock);
+      Parseh.updateCartBadge();
+      this.textContent = 'به سبد اضافه شد';
+      this.disabled = true;
+      var self = this;
+      setTimeout(function () { self.textContent = 'افزودن به سبد'; self.disabled = false; }, 1200);
+    });
+    var rel = data.products.filter(function (x) { return x.category === p.category && x.sku !== p.sku; }).slice(0, 4);
+    if (rel.length) {
+      document.getElementById('related-wrap').style.display = '';
+      document.getElementById('related-grid').innerHTML = rel.map(function (x) {
+        return Parseh.productCard(x, (cats[x.category] || {}).name || '');
+      }).join('');
+    }
+  }).catch(function () {
+    host.innerHTML = '<p class="empty">محصول بارگذاری نشد؛ صفحه را دوباره بارگذاری کنید.</p>';
+  });
+});
+</script>
+</body>
+</html>

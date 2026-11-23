@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فروشگاه | پارسه</title>
+<meta name="description" content="همهٔ محصولات پارسه: لپ‌تاپ، کارت گرافیک، مانیتور، حافظه و لوازم جانبی. کاتالوگ نمونه است و قیمت‌ها واقعی نیستند.">
+<meta property="og:title" content="فروشگاه | پارسه">
+<meta property="og:description" content="همهٔ محصولات پارسه. کاتالوگ نمونه است و قیمت‌ها واقعی نیستند.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">پرش به محتوا</a>
+<div class="demo-banner"><strong>کاتالوگ نمونه</strong>: قیمت‌ها واقعی نیستند؛ لیست واقعی به‌زودی.</div>
+<header class="site-header" id="site-header"></header>
+<main id="main" class="section container">
+  <h1>فروشگاه</h1>
+  <p class="muted">همهٔ محصولات زیر نمونه‌اند و قیمت‌شان واقعی نیست؛ برای خرید واقعی، اول از دایرکت قیمت دقیق را بگیر.</p>
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="جستجو در محصولات…" aria-label="جستجو در محصولات">
+    <select id="cat" aria-label="دسته‌بندی">
+      <option value="">همهٔ دسته‌ها</option>
+    </select>
+    <select id="sort" aria-label="مرتب‌سازی">
+      <option value="featured">پیش‌فرض</option>
+      <option value="price-asc">ارزان‌ترین</option>
+      <option value="price-desc">گران‌ترین</option>
+      <option value="name">نام (الفبا)</option>
+    </select>
+  </div>
+  <p class="small muted" id="result-count"></p>
+  <div class="grid" id="shop-grid"><p class="muted">در حال بارگذاری محصولات…</p></div>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var qEl = document.getElementById('q'), catEl = document.getElementById('cat'),
+      sortEl = document.getElementById('sort'), grid = document.getElementById('shop-grid'),
+      countEl = document.getElementById('result-count');
+  var all = [], cats = {};
+  var params = new URLSearchParams(location.search);
+  if (params.get('cat')) { /* preset below after categories load */ }
+
+  function render() {
+    var q = qEl.value.trim(), cat = catEl.value, sort = sortEl.value;
+    var list = all.filter(function (p) {
+      if (cat && p.category !== cat) return false;
+      if (q) {
+        var hay = p.name + ' ' + (p.short || '') + ' ' + p.sku + ' ' +
+          Object.keys(p.specs || {}).map(function (k) { return k + ' ' + p.specs[k]; }).join(' ');
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    if (sort === 'price-asc') list.sort(function (a, b) { return a.price_toman - b.price_toman; });
+    if (sort === 'price-desc') list.sort(function (a, b) { return b.price_toman - a.price_toman; });
+    if (sort === 'name') list.sort(function (a, b) { return a.name.localeCompare(b.name, 'fa'); });
+    countEl.textContent = Number(list.length).toLocaleString('fa-IR') + ' محصول';
+    grid.innerHTML = list.length ? list.map(function (p) {
+      return Parseh.productCard(p, (cats[p.category] || {}).name || '');
+    }).join('') : '<p class="empty">محصولی با این مشخصات پیدا نشد.</p>';
+  }
+  [qEl, catEl, sortEl].forEach(function (el) { el.addEventListener('input', render); el.addEventListener('change', render); });
+
+  Parseh.loadJSON('products.json').then(function (data) {
+    all = data.products;
+    data.categories.forEach(function (c) {
+      cats[c.id] = c;
+      var o = document.createElement('option');
+      o.value = c.id; o.textContent = c.name;
+      catEl.appendChild(o);
+    });
+    var preset = params.get('cat');
+    if (preset && cats[preset]) catEl.value = preset;
+    render();
+  }).catch(function () {
+    grid.innerHTML = '<p class="empty">محصولات بارگذاری نشدند؛ صفحه را دوباره بارگذاری کنید.</p>';
+  });
+});
+</script>
+</body>
+</html>

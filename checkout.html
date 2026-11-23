@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ثبت سفارش | پارسه</title>
+<meta name="description" content="ثبت سفارش در پارسه: اطلاعات تماس و ارسال. پرداخت در این مرحله انجام نمی‌شود.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">پرش به محتوا</a>
+<div class="demo-banner"><strong>کاتالوگ نمونه</strong>: قیمت‌ها واقعی نیستند؛ لیست واقعی به‌زودی.</div>
+<header class="site-header" id="site-header"></header>
+<main id="main" class="section container">
+  <h1>ثبت سفارش</h1>
+  <p class="muted">پرداخت در این مرحله انجام نمی‌شود؛ پس از ثبت سفارش، از دایرکت هماهنگ می‌کنیم و لینک پرداخت دیجی‌پی ارسال می‌شود.</p>
+  <div id="checkout-host"><p class="muted">در حال بارگذاری…</p></div>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var host = document.getElementById('checkout-host');
+  Parseh.loadJSON('products.json').then(function (data) {
+    var bySku = {};
+    data.products.forEach(function (p) { bySku[p.sku] = p; });
+    var items = ParsehCart.read();
+    if (!items.length) {
+      host.innerHTML = '<p class="empty">سبد خرید شما خالی است.<br><a class="btn" href="shop.html" style="margin-top:13px">دیدن محصولات</a></p>';
+      return;
+    }
+    var t = ParsehCart.totals(items, data.products, data.meta.shipping);
+    var lines = items.map(function (line) {
+      var p = bySku[line.sku];
+      return p ? '<div class="row"><span>' + Parseh.escapeHtml(p.name) + ' × ' + Number(line.qty).toLocaleString('fa-IR') + '</span><span>' + Parseh.escapeHtml(ParsehCart.formatToman(p.price_toman * line.qty)) + '</span></div>' : '';
+    }).join('');
+    host.innerHTML =
+      '<div class="order-summary"><h2 style="font-size:19px">خلاصهٔ سفارش</h2>' + lines +
+      '<div class="row"><span>جمع اقلام</span><span>' + Parseh.escapeHtml(ParsehCart.formatToman(t.subtotal)) + '</span></div>' +
+      '<div class="row"><span>هزینهٔ ارسال</span><span id="sum-shipping">' + (t.shipping === 0 ? 'رایگان' : Parseh.escapeHtml(ParsehCart.formatToman(t.shipping))) + '</span></div>' +
+      '<div class="row total"><span>مبلغ نهایی</span><span id="sum-total">' + Parseh.escapeHtml(ParsehCart.formatToman(t.total)) + '</span></div></div>' +
+      '<form class="form" id="order-form" novalidate>' +
+      '<div class="field" id="f-name"><label for="name">نام و نام خانوادگی *</label>' +
+      '<input id="name" name="name" type="text" autocomplete="name" placeholder="نام کامل شما">' +
+      '<p class="error">نام را کامل بنویسید (حداقل ۲ حرف).</p></div>' +
+      '<div class="field" id="f-phone"><label for="phone">شماره موبایل *</label>' +
+      '<input id="phone" name="phone" type="tel" dir="ltr" style="text-align:right" autocomplete="tel" placeholder="09xxxxxxxxx">' +
+      '<p class="hint">فقط شمارهٔ موبایل ۱۱ رقمی با ۰۹ شروع شود.</p><p class="error">شمارهٔ موبایل معتبر نیست؛ ۱۱ رقم با ۰۹ بنویسید.</p></div>' +
+      '<div class="field" id="f-city"><label for="city">شهر *</label>' +
+      '<input id="city" name="city" type="text" autocomplete="address-level2" placeholder="مثلاً بیرجند">' +
+      '<p class="error">شهر را بنویسید.</p></div>' +
+      '<div class="field" id="f-address"><label for="address">آدرس کامل *</label>' +
+      '<textarea id="address" name="address" rows="3" placeholder="خیابان، کوچه، پلاک، واحد"></textarea>' +
+      '<p class="error">آدرس کامل را بنویسید (حداقل ۱۰ حرف).</p></div>' +
+      '<div class="field" id="f-shipping"><label>روش ارسال *</label><div class="radio-group">' +
+      '<label class="radio-card"><input type="radio" name="shipping" value="post"> ارسال پستی: ۱۵۰٬۰۰۰ تومان</label>' +
+      '<label class="radio-card"><input type="radio" name="shipping" value="pickup"> تحویل حضوری در بیرجند: رایگان</label>' +
+      '</div><p class="error">یک روش ارسال انتخاب کنید.</p></div>' +
+      '<div class="field"><label for="note">توضیحات (اختیاری)</label>' +
+      '<textarea id="note" name="note" rows="2" placeholder="اگر نکته‌ای هست، اینجا بنویسید"></textarea></div>' +
+      '<p class="error" id="form-error" style="display:none">همهٔ فیلدهای ستاره‌دار را کامل کنید.</p>' +
+      '<button class="btn btn-block" type="submit">ثبت سفارش</button>' +
+      '<p class="small muted" style="margin-top:13px">با ثبت سفارش، اطلاعات شما فقط برای پیگیری همین سفارش استفاده می‌شود. جزئیات در <a href="privacy.html">حریم خصوصی</a>.</p>' +
+      '</form>';
+
+    var form = document.getElementById('order-form');
+    function refreshSummary() {
+      var ship = form.querySelector('input[name="shipping"]:checked');
+      var fee = !ship ? t.shipping : (ship.value === 'pickup' ? 0 : t.shipping);
+      document.getElementById('sum-shipping').textContent = fee === 0 ? 'رایگان' : ParsehCart.formatToman(fee);
+      document.getElementById('sum-total').textContent = ParsehCart.formatToman(t.subtotal + fee);
+    }
+    form.querySelectorAll('input[name="shipping"]').forEach(function (r) {
+      r.addEventListener('change', refreshSummary);
+    });
+    function mark(id, bad) { document.getElementById(id).classList.toggle('invalid', bad); return !bad; }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = document.getElementById('name').value.trim();
+      var phone = document.getElementById('phone').value.replace(/[\s-]/g, '').trim();
+      var city = document.getElementById('city').value.trim();
+      var address = document.getElementById('address').value.trim();
+      var ship = form.querySelector('input[name="shipping"]:checked');
+      var ok = true;
+      ok = mark('f-name', name.length < 2) && ok;
+      ok = mark('f-phone', !/^09\d{9}$/.test(phone)) && ok;
+      ok = mark('f-city', city.length < 2) && ok;
+      ok = mark('f-address', address.length < 10) && ok;
+      ok = mark('f-shipping', !ship) && ok;
+      document.getElementById('form-error').style.display = ok ? 'none' : 'block';
+      if (!ok) return;
+      /* pickup = no shipping fee; post = the flat sample fee (free above the threshold already in totals) */
+      var shippingFee = ship.value === 'pickup' ? 0 : t.shipping;
+      var order = {
+        id: ParsehCart.newOrderId(),
+        created_at: new Date().toISOString(),
+        customer: { name: name, phone: phone, city: city, address: address },
+        shipping_method: ship.value,
+        note: document.getElementById('note').value.trim(),
+        items: items.map(function (line) {
+          var p = bySku[line.sku];
+          return { sku: line.sku, name: p ? p.name : line.sku, qty: line.qty, price_toman: p ? p.price_toman : 0 };
+        }),
+        subtotal_toman: t.subtotal,
+        shipping_toman: shippingFee,
+        total_toman: t.subtotal + shippingFee,
+        demo: true
+      };
+      ParsehCart.saveOrder(order);
+      ParsehCart.clear();
+      Parseh.updateCartBadge();
+      location.href = 'confirmation.html?order=' + encodeURIComponent(order.id);
+    });
+  }).catch(function () {
+    host.innerHTML = '<p class="empty">سفارش بارگذاری نشد؛ صفحه را دوباره بارگذاری کنید.</p>';
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" role="img" aria-label="ROG Strix G16">
+<rect width="800" height="500" fill="#1d1d1d"/>
+<rect x="14" y="14" width="772" height="472" fill="none" stroke="#c9a227" stroke-width="2" opacity="0.55"/>
+<rect x="28" y="28" width="744" height="444" fill="none" stroke="#c9a227" stroke-width="1" opacity="0.25"/>
+<circle cx="400" cy="190" r="86" fill="none" stroke="#c9a227" stroke-width="2" opacity="0.7"/>
+<circle cx="400" cy="190" r="62" fill="none" stroke="#c9a227" stroke-width="1" opacity="0.35"/>
+<text x="400" y="208" text-anchor="middle" font-family="Vazirmatn, Tahoma, sans-serif" font-size="44" font-weight="bold" fill="#e3c766">لپ‌تاپ</text>
+<text x="400" y="330" text-anchor="middle" font-family="Vazirmatn, Tahoma, sans-serif" font-size="30" fill="#f2efe9">ROG Strix G16</text>
+<text x="400" y="380" text-anchor="middle" font-family="Vazirmatn, Tahoma, sans-serif" font-size="22" fill="#a8a29a">پارسه | شهر پارسیان</text>
+<text x="760" y="52" text-anchor="end" font-family="Vazirmatn, Tahoma, sans-serif" font-size="22" fill="#c9a227">نمونه</text>
+</svg>

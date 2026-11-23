@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تماس | پارسه</title>
+<meta name="description" content="تماس با پارسه: دایرکت اینستاگرام و ایمیل فروشگاه.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">پرش به محتوا</a>
+<div class="demo-banner"><strong>کاتالوگ نمونه</strong>: قیمت‌ها واقعی نیستند؛ لیست واقعی به‌زودی.</div>
+<header class="site-header" id="site-header"></header>
+<main id="main" class="section container">
+  <h1>تماس با پارسه</h1>
+  <p class="muted">سریع‌ترین راه، دایرکت اینستاگرام است. برای سؤال دربارهٔ موجودی و قیمت، مدل دقیق یا بودجه‌ت رو بفرست.</p>
+  <div class="contact-cards">
+    <div class="contact-card">
+      <h3>اینستاگرام</h3>
+      <p><a href="https://instagram.com/parseh" dir="ltr">@parseh</a></p>
+      <p class="small muted">هندل نمونه است و جایگزین می‌شود.</p>
+      <p><a class="btn btn-sm" href="https://ig.me/m/parseh">پیام در دایرکت</a></p>
+    </div>
+    <div class="contact-card">
+      <h3>ایمیل</h3>
+      <p><a href="mailto:mr0x369+parseh@proton.me" dir="ltr">mr0x369+parseh@proton.me</a></p>
+      <p class="small muted">برای پیگیری سفارش و موارد رسمی.</p>
+    </div>
+    <div class="contact-card">
+      <h3>شهر</h3>
+      <p>بیرجند</p>
+      <p class="small muted">محل فروشگاه در دست تأیید است؛ آدرس دقیق بعداً اعلام می‌شود.</p>
+    </div>
+  </div>
+  <h2 style="margin-top:34px">پیام بفرستید</h2>
+  <p class="muted">فرم زیر پیام شما را آماده می‌کند تا از دایرکت بفرستید؛ پیام مستقیم از سایت ارسال نمی‌شود.</p>
+  <form class="form" id="contact-form">
+    <div class="field"><label for="c-name">نام *</label><input id="c-name" type="text" autocomplete="name"></div>
+    <div class="field"><label for="c-msg">پیام *</label><textarea id="c-msg" rows="4" placeholder="مدل قطعه یا سؤالتان را بنویسید"></textarea></div>
+    <button class="btn" type="submit">آماده‌کردن متن برای دایرکت</button>
+  </form>
+  <div class="dm-text" id="contact-dm" style="display:none"></div>
+  <p><a class="btn btn-ghost" id="contact-open-dm" href="https://ig.me/m/parseh" style="display:none">بازکردن دایرکت اینستاگرام</a></p>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('contact-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('c-name').value.trim();
+    var msg = document.getElementById('c-msg').value.trim();
+    if (name.length < 2 || msg.length < 3) {
+      alert('نام و پیام را کامل بنویسید.');
+      return;
+    }
+    var text = 'سلام، من ' + name + ' هستم.\n' + msg;
+    var box = document.getElementById('contact-dm');
+    box.textContent = text;
+    box.style.display = 'block';
+    document.getElementById('contact-open-dm').style.display = 'inline-block';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(function () {});
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سفارش ثبت شد | پارسه</title>
+<meta name="description" content="سفارش شما در پارسه ثبت شد؛ برای هماهنگی پرداخت و ارسال، از دایرکت پیام بدهید.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">پرش به محتوا</a>
+<div class="demo-banner"><strong>کاتالوگ نمونه</strong>: قیمت‌ها واقعی نیستند؛ لیست واقعی به‌زودی.</div>
+<header class="site-header" id="site-header"></header>
+<main id="main" class="section container">
+  <div id="confirm-host"><p class="muted">در حال بارگذاری سفارش…</p></div>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var host = document.getElementById('confirm-host');
+  var id = new URLSearchParams(location.search).get('order');
+  var order = id ? ParsehCart.getOrder(id) : null;
+  if (!order) {
+    host.innerHTML = '<div class="confirm-box"><h1>سفارشی پیدا نشد</h1>' +
+      '<p class="muted">ممکن است سفارش در مرورگر دیگری ثبت شده باشد یا حافظه پاک شده باشد.</p>' +
+      '<p><a class="btn" href="shop.html">بازگشت به فروشگاه</a></p></div>';
+    return;
+  }
+  var lines = order.items.map(function (it) {
+    return it.name + ' × ' + Number(it.qty).toLocaleString('fa-IR') + ': ' + ParsehCart.formatToman(it.price_toman * it.qty);
+  }).join('\n');
+  var dmText = 'سلام، سفارش جدید در سایت پارسه ثبت کردم.\n' +
+    'شمارهٔ سفارش: ' + order.id + '\n' +
+    'نام: ' + order.customer.name + '\n' +
+    'شهر: ' + order.customer.city + '\n' +
+    'روش ارسال: ' + (order.shipping_method === 'pickup' ? 'تحویل حضوری در بیرجند' : 'ارسال پستی') + '\n' +
+    'اقلام:\n' + lines + '\n' +
+    'مبلغ نهایی: ' + ParsehCart.formatToman(order.total_toman) + '\n' +
+    'لطفاً برای پرداخت و زمان تحویل راهنمایی کنید.';
+  var rows = order.items.map(function (it) {
+    return '<div class="row"><span>' + Parseh.escapeHtml(it.name) + ' × ' + Number(it.qty).toLocaleString('fa-IR') + '</span><span>' + Parseh.escapeHtml(ParsehCart.formatToman(it.price_toman * it.qty)) + '</span></div>';
+  }).join('');
+  host.innerHTML =
+    '<div class="confirm-box"><h1>سفارش شما ثبت شد</h1>' +
+    '<p class="muted">شمارهٔ سفارش</p><p class="order-id">' + Parseh.escapeHtml(order.id) + '</p>' +
+    '<p>سفارش شما ثبت شد. برای هماهنگی پرداخت و زمان تحویل، متن زیر را از دایرکت اینستاگرام بفرستید.</p></div>' +
+    '<div class="order-summary"><h2 style="font-size:19px">خلاصهٔ سفارش</h2>' + rows +
+    '<div class="row"><span>جمع اقلام</span><span>' + Parseh.escapeHtml(ParsehCart.formatToman(order.subtotal_toman)) + '</span></div>' +
+    '<div class="row"><span>هزینهٔ ارسال (' + (order.shipping_method === 'pickup' ? 'تحویل حضوری' : 'پستی') + ')</span><span>' + (order.shipping_toman === 0 ? 'رایگان' : Parseh.escapeHtml(ParsehCart.formatToman(order.shipping_toman))) + '</span></div>' +
+    '<div class="row total"><span>مبلغ نهایی</span><span>' + Parseh.escapeHtml(ParsehCart.formatToman(order.total_toman)) + '</span></div>' +
+    '<p class="small muted">خریدار: ' + Parseh.escapeHtml(order.customer.name) + '، ' + Parseh.escapeHtml(order.customer.city) + '</p></div>' +
+    '<h2>مرحلهٔ بعد: پیام در دایرکت</h2>' +
+    '<p class="muted">متن آمادهٔ زیر را کپی کنید و در دایرکت اینستاگرام پارسه بفرستید:</p>' +
+    '<div class="dm-text" id="dm-text">' + Parseh.escapeHtml(dmText) + '</div>' +
+    '<div class="actions-row">' +
+    '<button class="btn" id="copy-dm">کپی متن سفارش</button>' +
+    '<a class="btn btn-ghost" href="' + Parseh.IG_DM_URL + '" target="_blank" rel="noopener">بازکردن دایرکت اینستاگرام</a>' +
+    '</div>' +
+    '<h2 style="margin-top:34px">پرداخت</h2>' +
+    '<p class="muted">پرداخت با لینک دیجی‌پی انجام می‌شود؛ لینک پرداخت هنوز آماده نیست و پس از هماهنگی در دایرکت ارسال می‌شود.</p>' +
+    '<div class="actions-row"><a class="btn btn-ghost" href="#digipay-link-placeholder" id="digipay-btn">به‌زودی — لینک پرداخت</a></div>' +
+    '<p class="small muted" id="digipay-note" style="display:none;text-align:center">لینک پرداخت دیجی‌پی هنوز فعال نشده؛ پس از تأیید سفارش در دایرکت، لینک برای شما ارسال می‌شود.</p>' +
+    '<p style="text-align:center;margin-top:34px"><a class="btn" href="shop.html">ادامهٔ خرید</a></p>';
+
+  document.getElementById('copy-dm').addEventListener('click', function () {
+    var self = this;
+    function done() { self.textContent = 'کپی شد'; setTimeout(function () { self.textContent = 'کپی متن سفارش'; }, 1500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(dmText).then(done).catch(function () { fallback(); });
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = dmText; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* clipboard unavailable */ }
+      document.body.removeChild(ta);
+    }
+  });
+  document.getElementById('digipay-btn').addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('digipay-note').style.display = 'block';
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سبد خرید | پارسه</title>
+<meta name="description" content="سبد خرید پارسه: اقلام انتخابی، جمع و هزینهٔ ارسال.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">پرش به محتوا</a>
+<div class="demo-banner"><strong>کاتالوگ نمونه</strong>: قیمت‌ها واقعی نیستند؛ لیست واقعی به‌زودی.</div>
+<header class="site-header" id="site-header"></header>
+<main id="main" class="section container">
+  <h1>سبد خرید</h1>
+  <div id="cart-host"><p class="muted">در حال بارگذاری سبد…</p></div>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var host = document.getElementById('cart-host');
+  Parseh.loadJSON('products.json').then(function (data) {
+    var bySku = {};
+    data.products.forEach(function (p) { bySku[p.sku] = p; });
+    function render() {
+      var items = ParsehCart.read();
+      if (!items.length) {
+        host.innerHTML = '<p class="empty">سبد خرید شما خالی است.<br><a class="btn" href="shop.html" style="margin-top:13px">دیدن محصولات</a></p>';
+        Parseh.updateCartBadge();
+        return;
+      }
+      var rows = items.map(function (line) {
+        var p = bySku[line.sku];
+        if (!p) return '';
+        return '<tr><td><div class="cart-item"><img src="' + Parseh.escapeHtml(p.image) + '" alt="">' +
+          '<div><a href="product.html?sku=' + encodeURIComponent(p.sku) + '">' + Parseh.escapeHtml(p.name) + '</a>' +
+          '<div class="small muted"><span dir="ltr">' + Parseh.escapeHtml(p.sku) + '</span> · نمونه</div></div></div></td>' +
+          '<td>' + Parseh.escapeHtml(ParsehCart.formatToman(p.price_toman)) + '</td>' +
+          '<td><button class="qty-btn" data-dec="' + Parseh.escapeHtml(p.sku) + '" aria-label="کمتر">−</button> ' +
+          '<span class="qty-val">' + Number(line.qty).toLocaleString('fa-IR') + '</span> ' +
+          '<button class="qty-btn" data-inc="' + Parseh.escapeHtml(p.sku) + '" data-max="' + p.stock + '" aria-label="بیشتر">+</button></td>' +
+          '<td>' + Parseh.escapeHtml(ParsehCart.formatToman(p.price_toman * line.qty)) + '</td>' +
+          '<td><button class="link-danger" data-remove="' + Parseh.escapeHtml(p.sku) + '">حذف</button></td></tr>';
+      }).join('');
+      var t = ParsehCart.totals(items, data.products, data.meta.shipping);
+      host.innerHTML =
+        '<table class="cart-table"><thead><tr><th>محصول</th><th>قیمت واحد</th><th>تعداد</th><th>جمع</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<div class="totals">' +
+        '<div class="row"><span>جمع اقلام</span><span>' + Parseh.escapeHtml(ParsehCart.formatToman(t.subtotal)) + '</span></div>' +
+        '<div class="row"><span>هزینهٔ ارسال</span><span>' + (t.shipping === 0 ? 'رایگان' : Parseh.escapeHtml(ParsehCart.formatToman(t.shipping))) + '</span></div>' +
+        '<div class="row total"><span>مبلغ نهایی</span><span>' + Parseh.escapeHtml(ParsehCart.formatToman(t.total)) + '</span></div>' +
+        '<p class="small muted">قانون ارسال نمونه است: ۱۵۰٬۰۰۰ تومان، رایگان برای سفارش‌های بالای ۱۰٬۰۰۰٬۰۰۰ تومان. با اعلام مالک تغییر می‌کند.</p>' +
+        '<p><a class="btn btn-block" href="checkout.html">ادامه و ثبت سفارش</a></p>' +
+        '<p><button class="link-danger" id="clear-cart">خالی‌کردن سبد</button></p>' +
+        '</div>';
+      host.querySelectorAll('[data-inc]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var cur = ParsehCart.read().filter(function (i) { return i.sku === b.getAttribute('data-inc'); })[0];
+          ParsehCart.setQty(b.getAttribute('data-inc'), (cur ? cur.qty : 0) + 1, parseInt(b.getAttribute('data-max'), 10));
+          render();
+        });
+      });
+      host.querySelectorAll('[data-dec]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var cur = ParsehCart.read().filter(function (i) { return i.sku === b.getAttribute('data-dec'); })[0];
+          ParsehCart.setQty(b.getAttribute('data-dec'), (cur ? cur.qty : 0) - 1, 99);
+          render();
+        });
+      });
+      host.querySelectorAll('[data-remove]').forEach(function (b) {
+        b.addEventListener('click', function () { ParsehCart.remove(b.getAttribute('data-remove')); render(); });
+      });
+      var clearBtn = document.getElementById('clear-cart');
+      if (clearBtn) clearBtn.addEventListener('click', function () { ParsehCart.clear(); render(); });
+      Parseh.updateCartBadge();
+    }
+    render();
+  }).catch(function () {
+    host.innerHTML = '<p class="empty">سبد بارگذاری نشد؛ صفحه را دوباره بارگذاری کنید.</p>';
+  });
+});
+</script>
+</body>
+</html>
